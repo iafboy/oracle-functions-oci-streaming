@@ -15,49 +15,56 @@ import com.oracle.bmc.streaming.requests.PutMessagesRequest;
 import com.oracle.bmc.streaming.responses.ListStreamsResponse;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.io.File;
+
 
 public class StreamProducerFunction {
 
     private StreamAdminClient sAdminClient = null;
     private StreamClient streamClient = null;
     AuthenticationDetailsProvider authProvider = null;
-
+ 
     public StreamProducerFunction() {
-
-        try {
-            String privateKey = System.getenv().get("OCI_PRIVATE_KEY_FILE_NAME");
-            Supplier<InputStream> privateKeySupplier = () -> {
+	String privateKey = System.getenv().get("OCI_PRIVATE_KEY_FILE_NAME");
+	String ociPrivateKeyPath = "/function/" + privateKey;
+        
+	try {   
+        Supplier<InputStream> privateKeySupplier = () -> {
                 InputStream is = null;
-                String ociPrivateKeyPath = "/function/" + privateKey;
                 System.err.println("Private key location - " + ociPrivateKeyPath);
 
+		File file = new File(ociPrivateKeyPath);
+		FileInputStream in = null;
+		if (!file.exists()){
+		    System.err.println("OCI private key is not in "+ociPrivateKeyPath);
+		}
                 try {
-                    is = new FileInputStream(ociPrivateKeyPath);
-                } catch (FileNotFoundException ex) {
+                    is = new FileInputStream(file);
+                } catch (Exception ex) {
                     System.err.println("Problem accessing OCI private key at " + ociPrivateKeyPath + " - " + ex.getMessage());
                 }
-
+		
                 return is;
 
-            };
+        };
+		
 
             authProvider
                     = SimpleAuthenticationDetailsProvider.builder()
                             .tenantId(System.getenv().get("TENANCY"))
                             .userId(System.getenv().get("USER"))
                             .fingerprint(System.getenv().get("FINGERPRINT"))
-                            .passPhrase(System.getenv().get("PASSPHRASE"))
                             .privateKeySupplier(privateKeySupplier)
                             .build();
 
             sAdminClient = new StreamAdminClient(authProvider);
             String region = System.getenv().get("REGION"); //e.g. us-phoneix-1
-            sAdminClient.setEndpoint("https://streams." + region + ".streaming.oci.oraclecloud.com");
-
+            //sAdminClient.setEndpoint("https://streams." + region + ".streaming.oci.oraclecloud.com");
+	        sAdminClient.setEndpoint("https://cell-1.streaming."+region+".oci.oraclecloud.com");
+            System.out.println("Stream client inited "+(sAdminClient==null));	
         } catch (Throwable ex) {
             System.err.println("Error occurred in StreamProducerFunction constructor - " + ex.getMessage());
         }
@@ -65,8 +72,7 @@ public class StreamProducerFunction {
 
     public String produce(Message msg) {
         String result = null;
-
-        if (streamClient == null || sAdminClient == null) {
+        if (streamClient == null && sAdminClient == null) {
             result = "Stream Admin or Stream Client not ready. Please check for errors in constructor";
             System.out.println(result);
             return result;
@@ -125,11 +131,11 @@ public class StreamProducerFunction {
             result = "Error occurred - " + e.getMessage();
 
             System.out.println(result);
-        } /*finally {
+        } finally {
             sAdminClient.close();
             streamClient.close();
             System.out.println("Closed stream clients");
-        }*/
+        }
 
         return result;
     }
