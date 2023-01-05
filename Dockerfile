@@ -8,7 +8,9 @@ RUN echo "using OCI Java SDK version " $OCI_JAVA_SDK_VERSION
 ARG OCI_JAVA_SDK_JAR_NAME=oci-java-sdk-full-$OCI_JAVA_SDK_VERSION.jar
 
 ARG OCI_JAVA_SDK_RELEASE_URL=https://github.com/oracle/oci-java-sdk/releases/download/v$OCI_JAVA_SDK_VERSION/oci-java-sdk.zip
-RUN curl -LJO $OCI_JAVA_SDK_RELEASE_URL
+#ARG OCI_JAVA_SDK_RELEASE_URL=https://github.com/oracle/oci-java-sdk/releases/download/v$OCI_JAVA_SDK_VERSION/oci-java-sdk-$OCI_JAVA_SDK_VERSION.zip
+#RUN curl -LJO $OCI_JAVA_SDK_RELEASE_URL
+RUN curl -LJo oci-java-sdk.zip $OCI_JAVA_SDK_RELEASE_URL
 RUN unzip -d oci-java-sdk oci-java-sdk.zip
 
 ARG OCI_JAVA_SDK_JAR_PATH=oci-java-sdk/lib/$OCI_JAVA_SDK_JAR_NAME
@@ -27,8 +29,11 @@ COPY --from=build-stage /function/target/*.jar /function/app/
 
 # Add OCI private key for OCI Java SDK authentication (OCI object storage API)
 ARG PRIVATE_KEY_NAME
-COPY $PRIVATE_KEY_NAME /function/$PRIVATE_KEY_NAME
+#COPY $PRIVATE_KEY_NAME /function/$PRIVATE_KEY_NAME
+COPY $PRIVATE_KEY_NAME /function/sshkey.pem
 # OCI_PRIVATE_KEY_FILE_NAME is used as environment variable in the function code. Altered name to avoid confusion
-ENV OCI_PRIVATE_KEY_FILE_NAME=${PRIVATE_KEY_NAME}
-
+RUN chmod 0644 /function/sshkey.pem
+#RUN ls -al /function
+#ENV OCI_PRIVATE_KEY_FILE_NAME=${PRIVATE_KEY_NAME}
+ENV OCI_PRIVATE_KEY_FILE_NAME=sshkey.pem
 CMD ["com.example.fn.StreamProducerFunction::produce"]
