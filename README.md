@@ -38,7 +38,7 @@ For e.g.
 
 Change into the top level directory - `cd oracle-functions-oci-streaming`
 
-Note: Before deploying the function, please copy your OCI private key file into the folder
+Note: Before deploying the function, please copy your OCI private key file into the folder，and give 0644 priviliage to the private key file
 
 To deploy
 
