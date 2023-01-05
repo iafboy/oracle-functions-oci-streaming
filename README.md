@@ -19,7 +19,7 @@ Last but not the least, clone (`git clone https://github.com/abhirockzz/oracle-f
 
 Create an application with required configuration
 
-`fn create app --annotation oracle.com/oci/subnetIds='["<OCI_SUBNET_OCIDs>"]' --config TENANCY=<TENANCY_OCID> --config USER=<USER_OCID --config FINGERPRINT=<PUBLIC_KEY_FINGERPRINT> --config PASSPHRASE=<PASSPHRASE> --config REGION=<OCI_REGION> fn-streaming-app`
+`fn create app --annotation oracle.com/oci/subnetIds='["<OCI_SUBNET_OCIDs>"]' --config TENANCY=<TENANCY_OCID> --config USER=<USER_OCID --config FINGERPRINT=<PUBLIC_KEY_FINGERPRINT> --config REGION=<OCI_REGION> fn-streaming-app`
 
 Summary of the configuration parameters
 
@@ -27,7 +27,6 @@ Summary of the configuration parameters
 - `TENANCY` - OCID of your tenancy
 - `USER` - OCID of the user which will be used to execute stream list and push operations
 - `FINGERPRINT` - public key fingerprint of the user
-- `PASSPHRASE` - passphrase of the private key
 - `REGION` - Streaming Service region
 
 For e.g.
